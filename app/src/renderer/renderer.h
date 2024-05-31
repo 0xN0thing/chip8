@@ -52,6 +52,6 @@ namespace nt
     template <class TRenderLayer, typename... Args>
     inline void IRenderer::AddRenderLayer(Args &&...args)
     {
-        renderLayers.emplace_back(new TRenderLayer(args));
+        renderLayers.emplace_back(new TRenderLayer(args...));
     }
 } // namespace nt

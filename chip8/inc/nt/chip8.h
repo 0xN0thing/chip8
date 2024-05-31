@@ -7,7 +7,7 @@ namespace nt
     namespace chip8
     {
         constexpr uint32_t gDefaultFontSetSize = 80;
-        extern const uint8_t const gDefaultFontSet[gDefaultFontSetSize];
+        extern const uint8_t gDefaultFontSet[gDefaultFontSetSize];
 
         class IVirtualMachine
         {
@@ -81,7 +81,7 @@ namespace nt
             Chip8Instruction vtable[17];
             Chip8Instruction vtable0[15];
             Chip8Instruction vtable8[15];
-            Chip8Instruction vtableF[15];
+            Chip8Instruction vtableF[0x65+1];
             Chip8Instruction vtableE[15];
 
             void Table0();

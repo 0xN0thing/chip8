@@ -5,6 +5,7 @@
 #include <stdint.h>
 
 struct GLFWwindow;
+#include <thread>
 
 namespace nt
 {
@@ -21,6 +22,9 @@ namespace nt
         GLFW();
         ~GLFW();
     };
+
+
+    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
 
     class App
     {
@@ -39,13 +43,19 @@ namespace nt
         void OnNewRendererInstalled();
         void OnNewVirtualMachineInstalled();
 
+        friend void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+
       private:
         IRenderer *renderer;
 
         GLFWwindow *wnd;
 
       private:
-        uint32_t buffer[64 * 32];
+        void SetupInputs(GLFWwindow* wnd);
+ 
+        void InputHandler(int key, int scancode, int action, int mods);
+        
+        float dt;
 
         std::chrono::time_point<std::chrono::high_resolution_clock>
             lastCycleTime;

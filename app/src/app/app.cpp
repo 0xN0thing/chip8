@@ -13,6 +13,8 @@
 
 #include <imgui.h>
 
+uint32_t buffer[64 * 32];
+
 void writeVideoToFile(const uint32_t video[], int width, int height,
                       const std::string &filename)
 {
@@ -58,18 +60,21 @@ nt::App::App(const char *title, uint32_t width, uint32_t height, int cycleDelay)
     showChip8Window = false;
     if (wnd == NULL)
         throw std::runtime_error("failed to create window!");
+
+    SetupInputs(wnd);
+
 }
 
 bool nt::App::IsActive() { return !glfwWindowShouldClose(wnd); }
 
 void nt::App::Update()
 {
-    auto currentTime = std::chrono::high_resolution_clock::now();
-    float dt = std::chrono::duration<float, std::chrono::milliseconds::period>(
-                   currentTime - lastCycleTime)
-                   .count();
-
     glfwPollEvents();
+    
+    auto currentTime = std::chrono::high_resolution_clock::now();
+    dt = std::chrono::duration<float, std::chrono::milliseconds::period>(
+        currentTime - lastCycleTime)
+        .count();
 
     if (dt > cycleDelay && work)
     {
@@ -209,17 +214,73 @@ void nt::App::OnNewRendererInstalled()
 
 }
 
+nt::App::~App() { glfwDestroyWindow(wnd); }
+
+void DrawCharacter(uint32_t* buffer, uint8_t character[5][5], int x_offset, int y_offset) {
+    for (int y = 0; y < 5; y++) {
+        for (int x = 0; x < 5; x++) {
+            if (character[y][x]) {
+                buffer[(y + y_offset) * 64 + (x + x_offset)] = 0xFFFFFF; // Draw pixel
+            }
+        }
+    }
+}
+
+
+uint8_t C[5][5] = {
+    {1, 1, 1, 1, 0},
+    {1, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0},
+    {1, 1, 1, 1, 0}
+};
+
+// Pattern for 'H'
+uint8_t H[5][5] = {
+    {1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1},
+    {1, 0, 0, 0, 1},
+    {1, 0, 0, 0, 1}
+};
+
+// Pattern for 'I'
+uint8_t I[5][5] = {
+    {1, 1, 1, 1, 1},
+    {0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 0},
+    {0, 0, 1, 0, 0},
+    {1, 1, 1, 1, 1}
+};
+
+// Pattern for 'P'
+uint8_t P[5][5] = {
+    {1, 1, 1, 1, 0},
+    {1, 0, 0, 0, 1},
+    {1, 1, 1, 1, 0},
+    {1, 0, 0, 0, 0},
+    {1, 0, 0, 0, 0}
+};
+
+// Pattern for '8'
+uint8_t eight[5][5] = {
+    {1, 1, 1, 1, 1},
+    {1, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1},
+    {1, 0, 0, 0, 1},
+    {1, 1, 1, 1, 1}
+};
+
 void nt::App::OnNewVirtualMachineInstalled()
 {
     memset(buffer, 0, 64 * 32);
 
-    for (uint32_t i = 0; i < 64 * 32; i += 1)
-    {
-        if (i % 2 == 0)
-            buffer[i] = 0xfffffff;
-    }
+    DrawCharacter(buffer, C, 16, 12);
+    DrawCharacter(buffer, H, 6 + 16, 12);
+    DrawCharacter(buffer, I, 12 + 16, 12);
+    DrawCharacter(buffer, P, 18 + 16, 12);
+    DrawCharacter(buffer, eight, 24 + 16, 12);
 
     renderer->InitRenderData(buffer);
 }
 
-nt::App::~App() { glfwDestroyWindow(wnd); }

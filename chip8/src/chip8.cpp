@@ -1,6 +1,7 @@
 ﻿#include "nt/chip8.h"
 
 #include <memory.h>
+#include <cassert>
 
 constexpr uint32_t gStartAddress = 0x200;
 constexpr uint32_t gFontSetStartAddress = 0x50;
@@ -130,7 +131,7 @@ void nt::chip8::IVirtualMachine::Update()
 
     pc += 2;
 
-    (this->*vtable[(opcode & 0xf000u) >> 12u])();
+    ((*this).*(vtable[(opcode & 0xF000u) >> 12u]))();
 
     if (delayTimer > 0)
     {
@@ -178,6 +179,11 @@ void nt::chip8::IVirtualMachine::LoadRom(const char *bytes, int len)
 void nt::chip8::IVirtualMachine::ClearScreen()
 {
     cls_00e0();
+}
+
+uint8_t* nt::chip8::IVirtualMachine::KeyPad()
+{
+    return keypad;
 }
 
 void nt::chip8::IVirtualMachine::LoadFont(const uint8_t *const buffer,

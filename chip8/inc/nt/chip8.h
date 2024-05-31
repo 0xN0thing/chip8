@@ -84,6 +84,9 @@ namespace nt
             virtual void LoadRomFromFile(const char* path) = 0;
 
             void ClearScreen();
+
+            uint8_t* KeyPad();
+
           private:
             typedef void (IVirtualMachine::*Chip8Instruction)();
             Chip8Instruction vtable[17];

@@ -10,7 +10,7 @@ add_executable(chip8_exec "src/main.cpp"
 "src/renderer/renderer.cpp" "src/renderer/renderer.h"
 "src/renderer/impl/gl3/renderer.h" "src/renderer/impl/gl3/renderer.cpp"
 "src/renderer/impl/gl3/shared/shader.h" "src/renderer/impl/gl3/shared/shader.cpp"
-)
+ "src/app/inputs.cpp")
 
 CPMAddPackage("gh:glfw/glfw#b35641f4a3c62aa86a0b3c983d163bc0fe36026d")
 

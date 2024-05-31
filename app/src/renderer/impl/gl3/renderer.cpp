@@ -123,6 +123,7 @@ nt::GL3::RendererImpl::RendererImpl(GLFWwindow *wnd)
       desc("default nt renderer: opengl 0.0 not initialized!"), VBO(0), VAO(0),
       EBO(0)
 {
+    data = NULL;
     glfwMakeContextCurrent(wnd);
 
     supportedGLVersion = gladLoadGL(glfwGetProcAddress);

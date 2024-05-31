@@ -3,6 +3,7 @@
 #include <functional>
 #include <stdint.h>
 #include <vector>
+#include <mutex>
 
 struct GLFWwindow;
 
@@ -44,9 +45,10 @@ namespace nt
 
         uint32_t width;
         uint32_t height;
-
       protected:
+        std::mutex dataAccess;
         GLFWwindow *wnd;
+        uint32_t* data;
     };
 
     template <class TRenderLayer, typename... Args>

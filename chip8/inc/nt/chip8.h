@@ -81,7 +81,7 @@ namespace nt
             Chip8Instruction vtable[17];
             Chip8Instruction vtable0[15];
             Chip8Instruction vtable8[15];
-            Chip8Instruction vtableF[0x65+1];
+            Chip8Instruction vtableF[0x65 + 1];
             Chip8Instruction vtableE[15];
 
             void Table0();

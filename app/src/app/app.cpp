@@ -6,25 +6,29 @@
 #include <GLFW/glfw3.h>
 #include <nt/chip8_std_impl.h>
 
-#include <iostream>
 #include <fstream>
 #include <iomanip>
+#include <iostream>
 #include <stdexcept>
 
 #include <imgui.h>
 
-
-void writeVideoToFile(const uint32_t video[], int width, int height, const std::string& filename) {
+void writeVideoToFile(const uint32_t video[], int width, int height,
+                      const std::string &filename)
+{
     std::ofstream outputFile(filename);
-    if (!outputFile.is_open()) {
+    if (!outputFile.is_open())
+    {
         std::cerr << "Error opening file: " << filename << std::endl;
         return;
     }
     outputFile << std::setw(8) << std::setfill('0');
 
     // Iterate through each pixel in the video array
-    for (int y = 0; y < height; ++y) {
-        for (int x = 0; x < width; ++x) {
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
             // Calculate the index of the current pixel in the video array
             int index = y * width + x;
 
@@ -32,7 +36,8 @@ void writeVideoToFile(const uint32_t video[], int width, int height, const std::
             outputFile << std::hex << video[index] << " ";
 
             // Add newline after each row
-            if (x == width - 1) {
+            if (x == width - 1)
+            {
                 outputFile << std::endl;
             }
         }
@@ -69,8 +74,6 @@ void nt::App::Update()
         lastCycleTime = currentTime;
         vm->Update();
         renderer->SetRenderData(vm->GetVideoBuffer());
-
-
     }
 
     if (renderer != NULL)
@@ -111,7 +114,7 @@ void nt::App::OnNewVirtualMachineInstalled()
 
     for (uint32_t i = 0; i < 64 * 32; i += 1)
     {
-        if(i % 2 == 0)
+        if (i % 2 == 0)
             buffer[i] = 0xfffffff;
     }
 

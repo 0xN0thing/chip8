@@ -10,7 +10,6 @@ int main()
     try
     {
         nt::chip8::VMImpl vm;
-        vm.LoadRomFromFile("test_opcode.ch8");
 
         nt::GLFW glfw{};
 

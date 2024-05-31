@@ -1,6 +1,7 @@
 #pragma once
 
 #include <chrono>
+#include <string>
 #include <stdint.h>
 
 struct GLFWwindow;
@@ -44,10 +45,17 @@ namespace nt
         GLFWwindow *wnd;
 
       private:
+        uint32_t buffer[64 * 32];
+
         std::chrono::time_point<std::chrono::high_resolution_clock>
             lastCycleTime;
         chip8::IVirtualMachine *vm;
-        uint32_t buffer[64 * 32];
+
+        std::string lastOpenedFirmware;
+
+        bool work;
+        bool showChip8Window;
+        bool showRendererWindow;
 
         int cycleDelay;
     };

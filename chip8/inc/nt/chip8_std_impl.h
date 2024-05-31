@@ -15,7 +15,7 @@ namespace nt
             ~VMImpl();
 
           public: // implementation
-            void LoadRomFromFile(const char *filename);
+            void LoadRomFromFile(const char *filename) override;
 
             uint8_t GenRandom() override;
 

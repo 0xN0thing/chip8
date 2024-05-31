@@ -16,6 +16,6 @@ CPMAddPackage("gh:glfw/glfw#b35641f4a3c62aa86a0b3c983d163bc0fe36026d")
 
 add_subdirectory("external")
 
-target_link_libraries(chip8_exec PRIVATE chip8 glad glfw imgui)
+target_link_libraries(chip8_exec PRIVATE chip8 glad glfw imgui libtinyfd)
 
 target_include_directories(chip8_exec PRIVATE "src/")

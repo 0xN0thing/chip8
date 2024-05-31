@@ -148,12 +148,36 @@ const uint32_t *nt::chip8::IVirtualMachine::GetVideoBuffer() const
     return video;
 }
 
+const uint16_t nt::chip8::IVirtualMachine::GetCurrentOpcode() const
+{
+    return opcode;
+}
+
+const uint16_t nt::chip8::IVirtualMachine::GetPC() const
+{
+    return pc;
+}
+const uint16_t* const nt::chip8::IVirtualMachine::GetStack() const
+{
+    return stack;
+}
+
+const uint8_t* const nt::chip8::IVirtualMachine::GetRegisters() const
+{
+    return registers;
+}
+
 void nt::chip8::IVirtualMachine::LoadRom(const char *bytes, int len)
 {
     for (long i = 0; i < len; i += 1)
     {
         memory[gStartAddress + i] = bytes[i];
     }
+}
+
+void nt::chip8::IVirtualMachine::ClearScreen()
+{
+    cls_00e0();
 }
 
 void nt::chip8::IVirtualMachine::LoadFont(const uint8_t *const buffer,

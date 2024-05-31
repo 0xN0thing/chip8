@@ -136,8 +136,17 @@ nt::GL3::RendererImpl::RendererImpl(GLFWwindow *wnd)
     {
         std::stringstream ss;
         ss << "default nt renderer: opengl "
-           << GLAD_VERSION_MAJOR(supportedGLVersion) << "."
-           << GLAD_VERSION_MINOR(supportedGLVersion);
+            << GLAD_VERSION_MAJOR(supportedGLVersion) << "."
+            << GLAD_VERSION_MINOR(supportedGLVersion);
+        
+        const GLubyte* renderer = glGetString(GL_RENDERER);
+        const GLubyte* vendor = glGetString(GL_VENDOR);
+
+        if (renderer && vendor) 
+        {
+           ss << "(" << glGetString(GL_RENDERER) << " " << glGetString(GL_VENDOR) << ")";
+        }
+
         desc = ss.str();
     }
 
@@ -176,11 +185,6 @@ void nt::GL3::RendererImpl::InitRenderData(const uint32_t *const data)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    // Set texture parameters
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    // glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);

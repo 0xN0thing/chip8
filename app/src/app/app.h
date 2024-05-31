@@ -47,6 +47,7 @@ namespace nt
         std::chrono::time_point<std::chrono::high_resolution_clock>
             lastCycleTime;
         chip8::IVirtualMachine *vm;
+        uint32_t buffer[64 * 32];
 
         int cycleDelay;
     };

@@ -14,7 +14,7 @@ int main()
 
         nt::GLFW glfw{};
 
-        nt::App app{"CHIP8", 1280, 640, 1000};
+        nt::App app{"CHIP8", 1280, 640, 10};
 
         app.InstallRenderer<nt::GL3::RendererImpl>();
         app.InstallVirtualMachine(&vm);

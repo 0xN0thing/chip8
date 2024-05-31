@@ -3,8 +3,8 @@
 
 #define REG_VF 0xF
 
-#define VIDEO_HEIGHT 50
-#define VIDEO_WIDTH 50
+#define VIDEO_HEIGHT 32
+#define VIDEO_WIDTH 64
 
 constexpr uint32_t gFontSetStartAddress = 0x50;
 
@@ -137,9 +137,10 @@ void nt::chip8::IVirtualMachine::shr_8xy6()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    registers[REG_VF] = registers[Vx] & 0x1u;
+    // Save LSB in VF
+    registers[REG_VF] = (registers[Vx] & 0x1u);
 
-    uint8_t res = registers[Vx] >> 1u;
+    registers[Vx] >>= 1;
 }
 
 void nt::chip8::IVirtualMachine::subn_8xy7()
@@ -212,10 +213,7 @@ void nt::chip8::IVirtualMachine::drw_dxyn()
                 {
                     registers[REG_VF] = 1;
                 }
-                else
-                {
-                    *screenPixel = 0xFFFFFFFF;
-                }
+                *screenPixel ^= 0xFFFFFFFF;
             }
         }
     }
@@ -367,7 +365,7 @@ void nt::chip8::IVirtualMachine::ld_fx55()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    for (uint32_t i = 0; i < 16; i += 1)
+    for (uint32_t i = 0; i <= Vx; i += 1)
     {
         memory[index + i] = registers[i];
     }
@@ -377,9 +375,9 @@ void nt::chip8::IVirtualMachine::ld_fx65()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
 
-    for (uint32_t i = 0; i < Vx; i += 1)
+    for (uint32_t i = 0; i <= Vx; i += 1)
     {
-        registers[i] = registers[index + i];
+        registers[i] = memory[index + i];
     }
 }
 

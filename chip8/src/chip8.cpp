@@ -76,7 +76,7 @@ nt::chip8::IVirtualMachine::IVirtualMachine()
     vtable[0x4] = &IVirtualMachine::sne_4xkk;
     vtable[0x5] = &IVirtualMachine::se_5xy0;
     vtable[0x6] = &IVirtualMachine::ld_6xkk;
-    vtable[0x7] = &IVirtualMachine::jp_1nnn;
+    vtable[0x7] = &IVirtualMachine::add_7xkk;
     vtable[0x8] = &IVirtualMachine::Table8;
 
     {
@@ -88,6 +88,7 @@ nt::chip8::IVirtualMachine::IVirtualMachine()
         vtable8[0x5] = &IVirtualMachine::sub_8xy5;
         vtable8[0x6] = &IVirtualMachine::shr_8xy6;
         vtable8[0x7] = &IVirtualMachine::subn_8xy7;
+        vtable8[0xE] = &IVirtualMachine::shl_8xyE;
     }
 
     vtable[0x9] = &IVirtualMachine::sne_9xy0;
@@ -115,6 +116,8 @@ nt::chip8::IVirtualMachine::IVirtualMachine()
         vtableF[0x55] = &IVirtualMachine::ld_fx55;
         vtableF[0x65] = &IVirtualMachine::ld_fx65;
     }
+
+    LoadFont(gDefaultFontSet, 80);
 }
 
 nt::chip8::IVirtualMachine::~IVirtualMachine() {}

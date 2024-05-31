@@ -6,10 +6,46 @@
 #include <GLFW/glfw3.h>
 #include <nt/chip8_std_impl.h>
 
+#include <fstream>
+#include <iomanip>
 #include <iostream>
 #include <stdexcept>
 
 #include <imgui.h>
+
+void writeVideoToFile(const uint32_t video[], int width, int height,
+                      const std::string &filename)
+{
+    std::ofstream outputFile(filename);
+    if (!outputFile.is_open())
+    {
+        std::cerr << "Error opening file: " << filename << std::endl;
+        return;
+    }
+    outputFile << std::setw(8) << std::setfill('0');
+
+    // Iterate through each pixel in the video array
+    for (int y = 0; y < height; ++y)
+    {
+        for (int x = 0; x < width; ++x)
+        {
+            // Calculate the index of the current pixel in the video array
+            int index = y * width + x;
+
+            // Write the hex value of the pixel to the file
+            outputFile << std::hex << video[index] << " ";
+
+            // Add newline after each row
+            if (x == width - 1)
+            {
+                outputFile << std::endl;
+            }
+        }
+    }
+
+    outputFile.close();
+    std::cout << "Video data has been written to " << filename << std::endl;
+}
 
 nt::App::App(const char *title, uint32_t width, uint32_t height, int cycleDelay)
     : wnd(glfwCreateWindow(width, height, title, NULL, NULL)),
@@ -59,10 +95,14 @@ void nt::App::OnNewRendererInstalled()
             ImGui::Begin(renderer->GetRendererDescription());
             ImGui::Text("renderer:");
             ImGui::Text(renderer->GetRendererDescription());
-            ImGui::SliderInt("CycleDelay", &cycleDelay, 5, 100000);
+            ImGui::InputInt("CycleDelay", &cycleDelay, 1, 10);
             if (ImGui::Button("restart"))
             {
                 vm->ResetPC();
+            }
+            if (ImGui::Button("save video to file"))
+            {
+                writeVideoToFile(vm->GetVideoBuffer(), 32, 64, "video.txt");
             }
             ImGui::End();
         });
@@ -70,7 +110,15 @@ void nt::App::OnNewRendererInstalled()
 
 void nt::App::OnNewVirtualMachineInstalled()
 {
-    renderer->InitRenderData(vm->GetVideoBuffer());
+    memset(buffer, 0, 64 * 32);
+
+    for (uint32_t i = 0; i < 64 * 32; i += 1)
+    {
+        if (i % 2 == 0)
+            buffer[i] = 0xfffffff;
+    }
+
+    renderer->InitRenderData(buffer);
 }
 
 nt::App::~App() { glfwDestroyWindow(wnd); }

@@ -2,8 +2,10 @@
 
 #include <chrono>
 #include <stdint.h>
+#include <string>
 
 struct GLFWwindow;
+#include <thread>
 
 namespace nt
 {
@@ -21,6 +23,9 @@ namespace nt
         ~GLFW();
     };
 
+    void keyCallback(GLFWwindow *window, int key, int scancode, int action,
+                     int mods);
+
     class App
     {
       public:
@@ -34,9 +39,14 @@ namespace nt
 
         void InstallVirtualMachine(chip8::IVirtualMachine *vm);
 
+        void SetVsync(bool v);
+
       private:
         void OnNewRendererInstalled();
         void OnNewVirtualMachineInstalled();
+
+        friend void keyCallback(GLFWwindow *window, int key, int scancode,
+                                int action, int mods);
 
       private:
         IRenderer *renderer;
@@ -44,10 +54,21 @@ namespace nt
         GLFWwindow *wnd;
 
       private:
+        void SetupInputs(GLFWwindow *wnd);
+
+        void InputHandler(int key, int scancode, int action, int mods);
+
+        float dt;
+
         std::chrono::time_point<std::chrono::high_resolution_clock>
             lastCycleTime;
         chip8::IVirtualMachine *vm;
-        uint32_t buffer[64 * 32];
+
+        std::string lastOpenedFirmware;
+
+        bool work;
+        bool showChip8Window;
+        bool showRendererWindow;
 
         int cycleDelay;
     };

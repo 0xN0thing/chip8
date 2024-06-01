@@ -1,6 +1,7 @@
 #pragma once
 
 #include <functional>
+#include <mutex>
 #include <stdint.h>
 #include <vector>
 
@@ -38,6 +39,9 @@ namespace nt
         virtual void InitRenderData(const uint32_t *const data);
         virtual void SetRenderData(const uint32_t *const data);
 
+        virtual bool GetVsyncState() const;
+        virtual void SetVsyncState(bool newState);
+
       private:
         std::vector<ImGuiRenderWindow> imGuiWindows;
         std::vector<IRendererLayer *> renderLayers;
@@ -46,7 +50,9 @@ namespace nt
         uint32_t height;
 
       protected:
+        std::mutex dataAccess;
         GLFWwindow *wnd;
+        uint32_t *data;
     };
 
     template <class TRenderLayer, typename... Args>

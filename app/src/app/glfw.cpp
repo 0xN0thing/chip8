@@ -18,8 +18,6 @@ nt::GLFW::GLFW()
     {
         throw std::runtime_error("failed to initialize glfw!");
     }
-
-    glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
 }
 
 nt::GLFW::~GLFW() { glfwTerminate(); }

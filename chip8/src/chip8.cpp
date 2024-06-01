@@ -1,5 +1,6 @@
 ﻿#include "nt/chip8.h"
 
+#include <cassert>
 #include <memory.h>
 
 constexpr uint32_t gStartAddress = 0x200;
@@ -26,27 +27,26 @@ const uint8_t nt::chip8::gDefaultFontSet[nt::chip8::gDefaultFontSetSize] = {
 
 void nt::chip8::IVirtualMachine::Table0()
 {
-    (this->*vtable0[opcode & 0x000f])();
+    ((*this).*(vtable0[opcode & 0x000Fu]))();
 }
 
 void nt::chip8::IVirtualMachine::Table8()
 {
-    (this->*vtable8[opcode & 0x000f])();
+    ((*this).*(vtable8[opcode & 0x000Fu]))();
 }
 
 void nt::chip8::IVirtualMachine::TableF()
 {
-    (this->*vtableF[opcode & 0x00ff])();
+    ((*this).*(vtableF[opcode & 0x00FFu]))();
 }
 
 void nt::chip8::IVirtualMachine::TableE()
 {
-    (this->*vtableE[opcode & 0x000f])();
+    ((*this).*(vtableE[opcode & 0x000Fu]))();
 }
 
-nt::chip8::IVirtualMachine::IVirtualMachine()
+void nt::chip8::IVirtualMachine::InstallInstructions()
 {
-    pc = gStartAddress;
     {
         size_t i = 0;
         for (; i <= 0xE; i += 1)
@@ -116,6 +116,13 @@ nt::chip8::IVirtualMachine::IVirtualMachine()
         vtableF[0x55] = &IVirtualMachine::ld_fx55;
         vtableF[0x65] = &IVirtualMachine::ld_fx65;
     }
+}
+
+nt::chip8::IVirtualMachine::IVirtualMachine()
+{
+    pc = gStartAddress;
+
+    InstallInstructions();
 
     LoadFont(gDefaultFontSet, 80);
 }
@@ -130,7 +137,9 @@ void nt::chip8::IVirtualMachine::Update()
 
     pc += 2;
 
-    (this->*vtable[(opcode & 0xf000u) >> 12u])();
+    uint32_t id = (opcode & 0xF000u) >> 12u;
+
+    ((*this).*(vtable[id]))();
 
     if (delayTimer > 0)
     {
@@ -148,6 +157,22 @@ const uint32_t *nt::chip8::IVirtualMachine::GetVideoBuffer() const
     return video;
 }
 
+const uint16_t nt::chip8::IVirtualMachine::GetCurrentOpcode() const
+{
+    return opcode;
+}
+
+const uint16_t nt::chip8::IVirtualMachine::GetPC() const { return pc; }
+const uint16_t *const nt::chip8::IVirtualMachine::GetStack() const
+{
+    return stack;
+}
+
+const uint8_t *const nt::chip8::IVirtualMachine::GetRegisters() const
+{
+    return registers;
+}
+
 void nt::chip8::IVirtualMachine::LoadRom(const char *bytes, int len)
 {
     for (long i = 0; i < len; i += 1)
@@ -155,6 +180,10 @@ void nt::chip8::IVirtualMachine::LoadRom(const char *bytes, int len)
         memory[gStartAddress + i] = bytes[i];
     }
 }
+
+void nt::chip8::IVirtualMachine::ClearScreen() { cls_00e0(); }
+
+uint8_t *nt::chip8::IVirtualMachine::KeyPad() { return keypad; }
 
 void nt::chip8::IVirtualMachine::LoadFont(const uint8_t *const buffer,
                                           const uint32_t fontSize)

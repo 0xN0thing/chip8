@@ -36,3 +36,7 @@ void nt::IRenderer::Draw() {}
 void nt::IRenderer::InitRenderData(const uint32_t *const data) {}
 
 void nt::IRenderer::SetRenderData(const uint32_t *const data) { (void)data; }
+
+bool nt::IRenderer::GetVsyncState() const { return false; }
+
+void nt::IRenderer::SetVsyncState(bool newState) {}

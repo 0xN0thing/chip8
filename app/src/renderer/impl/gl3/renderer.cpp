@@ -1,15 +1,18 @@
-#include "renderer/impl/gl3/renderer.h"
 #include "renderer/impl/gl3/shared/shader.h"
+#include "renderer/impl/gl3/renderer.h"
+
+
+
+#include <glad/gl.h>
+#include <GLFW/glfw3.h>
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 
 #include <iostream>
 #include <sstream>
 #include <stdexcept>
 
-#include <GLFW/glfw3.h>
-#include <glad/gl.h>
-#include <imgui.h>
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
 void APIENTRY openglCallbackFunction(GLenum source, GLenum type, GLuint id,
                                      GLenum severity, GLsizei length,
                                      const GLchar *message,
@@ -137,15 +140,16 @@ nt::GL3::RendererImpl::RendererImpl(GLFWwindow *wnd)
     {
         std::stringstream ss;
         ss << "default nt renderer: opengl "
-            << GLAD_VERSION_MAJOR(supportedGLVersion) << "."
-            << GLAD_VERSION_MINOR(supportedGLVersion);
-        
-        const GLubyte* renderer = glGetString(GL_RENDERER);
-        const GLubyte* vendor = glGetString(GL_VENDOR);
+           << GLAD_VERSION_MAJOR(supportedGLVersion) << "."
+           << GLAD_VERSION_MINOR(supportedGLVersion);
 
-        if (renderer && vendor) 
+        const GLubyte *renderer = glGetString(GL_RENDERER);
+        const GLubyte *vendor = glGetString(GL_VENDOR);
+
+        if (renderer && vendor)
         {
-           ss << "(" << glGetString(GL_RENDERER) << " " << glGetString(GL_VENDOR) << ")";
+            ss << "(" << glGetString(GL_RENDERER) << " "
+               << glGetString(GL_VENDOR) << ")";
         }
 
         desc = ss.str();
@@ -154,7 +158,7 @@ nt::GL3::RendererImpl::RendererImpl(GLFWwindow *wnd)
     glEnable(GL_DEBUG_OUTPUT);
     glDebugMessageCallback(openglCallbackFunction, nullptr);
     glfwSwapInterval(1); // Enable vsync
-
+    vsyncEnabled = true;
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
 
@@ -224,4 +228,12 @@ void nt::GL3::RendererImpl::Draw()
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
     glfwSwapBuffers(wnd);
+}
+
+bool nt::GL3::RendererImpl::GetVsyncState() const { return vsyncEnabled; }
+
+void nt::GL3::RendererImpl::SetVsyncState(bool newState)
+{
+    vsyncEnabled = newState;
+    glfwSwapInterval(newState);
 }

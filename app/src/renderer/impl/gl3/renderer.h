@@ -21,6 +21,9 @@ namespace nt
 
             void Draw() override;
 
+            bool GetVsyncState() const override;
+            void SetVsyncState(bool newState) override;
+
           private:
             int displayWidth;
             int displayHeight;
@@ -30,6 +33,8 @@ namespace nt
             std::string desc;
 
           private:
+            bool vsyncEnabled;
+
             void RenderObjectsInitialization();
             void FreeRenderObjects();
             void DrawRenderData();

@@ -1,8 +1,8 @@
 #pragma once
 
 #include <chrono>
-#include <string>
 #include <stdint.h>
+#include <string>
 
 struct GLFWwindow;
 #include <thread>
@@ -23,8 +23,8 @@ namespace nt
         ~GLFW();
     };
 
-
-    void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+    void keyCallback(GLFWwindow *window, int key, int scancode, int action,
+                     int mods);
 
     class App
     {
@@ -39,11 +39,14 @@ namespace nt
 
         void InstallVirtualMachine(chip8::IVirtualMachine *vm);
 
+        void SetVsync(bool v);
+
       private:
         void OnNewRendererInstalled();
         void OnNewVirtualMachineInstalled();
 
-        friend void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods);
+        friend void keyCallback(GLFWwindow *window, int key, int scancode,
+                                int action, int mods);
 
       private:
         IRenderer *renderer;
@@ -51,10 +54,10 @@ namespace nt
         GLFWwindow *wnd;
 
       private:
-        void SetupInputs(GLFWwindow* wnd);
- 
+        void SetupInputs(GLFWwindow *wnd);
+
         void InputHandler(int key, int scancode, int action, int mods);
-        
+
         float dt;
 
         std::chrono::time_point<std::chrono::high_resolution_clock>

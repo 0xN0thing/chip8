@@ -32,5 +32,4 @@ void nt::chip8::VMImpl::LoadRomFromFile(const char *filename)
     stream.close();
 }
 
-
 uint8_t nt::chip8::VMImpl::GenRandom() { return randByte(randGen); }

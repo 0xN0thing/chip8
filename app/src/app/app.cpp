@@ -62,7 +62,6 @@ nt::App::App(const char *title, uint32_t width, uint32_t height, int cycleDelay)
         throw std::runtime_error("failed to create window!");
 
     SetupInputs(wnd);
-
 }
 
 bool nt::App::IsActive() { return !glfwWindowShouldClose(wnd); }
@@ -70,11 +69,14 @@ bool nt::App::IsActive() { return !glfwWindowShouldClose(wnd); }
 void nt::App::Update()
 {
     glfwPollEvents();
-    
+
+    if (renderer != NULL)
+        renderer->Draw();
+
     auto currentTime = std::chrono::high_resolution_clock::now();
     dt = std::chrono::duration<float, std::chrono::milliseconds::period>(
-        currentTime - lastCycleTime)
-        .count();
+             currentTime - lastCycleTime)
+             .count();
 
     if (dt > cycleDelay && work)
     {
@@ -82,9 +84,6 @@ void nt::App::Update()
         vm->Update();
         renderer->SetRenderData(vm->GetVideoBuffer());
     }
-
-    if (renderer != NULL)
-        renderer->Draw();
 }
 
 void nt::App::InstallVirtualMachine(chip8::IVirtualMachine *vm)
@@ -94,16 +93,17 @@ void nt::App::InstallVirtualMachine(chip8::IVirtualMachine *vm)
     OnNewVirtualMachineInstalled();
 }
 
-const char* const chip8FileFilter[] = { "*.ch8" };
+void nt::App::SetVsync(bool v) { renderer->SetVsyncState(v); }
+
+const char *const chip8FileFilter[] = {"*.ch8"};
 
 void nt::App::OnNewRendererInstalled()
 {
     renderer->AddWindow(
-        [this](const IRenderer* renderer) -> void
+        [this](const IRenderer *renderer) -> void
         {
-            if (ImGui::BeginMainMenuBar()) {
-
-
+            if (ImGui::BeginMainMenuBar())
+            {
                 if (ImGui::MenuItem("Renderer"))
                 {
                     showRendererWindow = !showRendererWindow;
@@ -113,22 +113,25 @@ void nt::App::OnNewRendererInstalled()
                     showChip8Window = !showChip8Window;
                 }
 
-                if (ImGui::BeginMenu("hot actions")) 
+                if (ImGui::BeginMenu("hot actions"))
                 {
-                    if (ImGui::MenuItem("Load ROM")) 
+                    if (ImGui::MenuItem("Load ROM"))
                     {
-                        const char* path = tinyfd_openFileDialog("Open firmware", "", 1, chip8FileFilter, NULL, 1);
+                        const char *path = tinyfd_openFileDialog(
+                            "Open firmware", "", 1, chip8FileFilter, NULL, 1);
                         if (path)
                         {
                             vm->LoadRomFromFile(path);
                             lastOpenedFirmware = path;
                         }
                     }
-                    if (ImGui::MenuItem("Work", "chip8 work state toggle")) 
+                    if (ImGui::MenuItem("Work", "chip8 work state toggle"))
                     {
                         work = !work;
                     }
-                    if (ImGui::MenuItem("Reset", "chip8 set program counter into start position"))
+                    if (ImGui::MenuItem(
+                            "Reset",
+                            "chip8 set program counter into start position"))
                     {
                         vm->ResetPC();
                     }
@@ -140,17 +143,16 @@ void nt::App::OnNewRendererInstalled()
                     ImGui::EndMenu();
                 }
                 ImGui::EndMainMenuBar();
-
-
-
             }
         });
     renderer->AddWindow(
         [this](const IRenderer *renderer) -> void
         {
+            static bool isVsyncEnabled = renderer->GetVsyncState();
             if (showRendererWindow)
             {
-                ImGui::Begin(renderer->GetRendererDescription(), &showRendererWindow);
+                ImGui::Begin(renderer->GetRendererDescription(),
+                             &showRendererWindow);
                 ImGui::Text("renderer:");
                 ImGui::Text(renderer->GetRendererDescription());
 
@@ -162,13 +164,16 @@ void nt::App::OnNewRendererInstalled()
                 {
                     writeVideoToFile(vm->GetVideoBuffer(), 32, 64, "image.txt");
                 }
+                if (ImGui::Checkbox("Vsync", &isVsyncEnabled))
+                {
+                    SetVsync(isVsyncEnabled);
+                }
                 ImGui::End();
             }
         });
     renderer->AddWindow(
-        [this](const IRenderer* renderer) -> void
+        [this](const IRenderer *renderer) -> void
         {
-         
             if (showChip8Window)
             {
                 ImGui::Begin("chip8", &showChip8Window);
@@ -183,7 +188,8 @@ void nt::App::OnNewRendererInstalled()
 
                 if (ImGui::Button("Open firmware"))
                 {
-                    const char* path = tinyfd_openFileDialog("Open firmware", "", 1, chip8FileFilter, NULL, 1);
+                    const char *path = tinyfd_openFileDialog(
+                        "Open firmware", "", 1, chip8FileFilter, NULL, 1);
                     if (path)
                     {
                         vm->LoadRomFromFile(path);
@@ -192,16 +198,16 @@ void nt::App::OnNewRendererInstalled()
                 }
 
                 ImGui::Text("firmware: %s", lastOpenedFirmware.c_str());
-                ImGui::Text("opcode: %x", vm->GetCurrentOpcode());
+                ImGui::Text("opcode: %d (%x)", vm->GetCurrentOpcode());
                 ImGui::Text("pc: %d(%x)", vm->GetPC(), vm->GetPC());
 
-                const uint16_t* const stack = vm->GetStack();
+                const uint16_t *const stack = vm->GetStack();
                 for (uint32_t i = 0; i < 16; i += 1)
                 {
                     ImGui::Text("stack[%d]: %x", i, stack[i]);
                 }
 
-                const uint8_t* const registers = vm->GetRegisters();
+                const uint8_t *const registers = vm->GetRegisters();
                 for (uint32_t i = 0; i < 16; i += 1)
                 {
                     ImGui::Text("reg[%x]: %x", i, registers[i]);
@@ -209,67 +215,60 @@ void nt::App::OnNewRendererInstalled()
 
                 ImGui::End();
             }
-
         });
-
 }
 
 nt::App::~App() { glfwDestroyWindow(wnd); }
 
-void DrawCharacter(uint32_t* buffer, uint8_t character[5][5], int x_offset, int y_offset) {
-    for (int y = 0; y < 5; y++) {
-        for (int x = 0; x < 5; x++) {
-            if (character[y][x]) {
-                buffer[(y + y_offset) * 64 + (x + x_offset)] = 0xFFFFFF; // Draw pixel
+void DrawCharacter(uint32_t *buffer, uint8_t character[5][5], int x_offset,
+                   int y_offset)
+{
+    for (int y = 0; y < 5; y++)
+    {
+        for (int x = 0; x < 5; x++)
+        {
+            if (character[y][x])
+            {
+                buffer[(y + y_offset) * 64 + (x + x_offset)] =
+                    0xFFFFFF; // Draw pixel
             }
         }
     }
 }
 
-
-uint8_t C[5][5] = {
-    {1, 1, 1, 1, 0},
-    {1, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0},
-    {1, 1, 1, 1, 0}
-};
+uint8_t C[5][5] = {{1, 1, 1, 1, 0},
+                   {1, 0, 0, 0, 0},
+                   {1, 0, 0, 0, 0},
+                   {1, 0, 0, 0, 0},
+                   {1, 1, 1, 1, 0}};
 
 // Pattern for 'H'
-uint8_t H[5][5] = {
-    {1, 0, 0, 0, 1},
-    {1, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1},
-    {1, 0, 0, 0, 1}
-};
+uint8_t H[5][5] = {{1, 0, 0, 0, 1},
+                   {1, 0, 0, 0, 1},
+                   {1, 1, 1, 1, 1},
+                   {1, 0, 0, 0, 1},
+                   {1, 0, 0, 0, 1}};
 
 // Pattern for 'I'
-uint8_t I[5][5] = {
-    {1, 1, 1, 1, 1},
-    {0, 0, 1, 0, 0},
-    {0, 0, 1, 0, 0},
-    {0, 0, 1, 0, 0},
-    {1, 1, 1, 1, 1}
-};
+uint8_t I[5][5] = {{1, 1, 1, 1, 1},
+                   {0, 0, 1, 0, 0},
+                   {0, 0, 1, 0, 0},
+                   {0, 0, 1, 0, 0},
+                   {1, 1, 1, 1, 1}};
 
 // Pattern for 'P'
-uint8_t P[5][5] = {
-    {1, 1, 1, 1, 0},
-    {1, 0, 0, 0, 1},
-    {1, 1, 1, 1, 0},
-    {1, 0, 0, 0, 0},
-    {1, 0, 0, 0, 0}
-};
+uint8_t P[5][5] = {{1, 1, 1, 1, 0},
+                   {1, 0, 0, 0, 1},
+                   {1, 1, 1, 1, 0},
+                   {1, 0, 0, 0, 0},
+                   {1, 0, 0, 0, 0}};
 
 // Pattern for '8'
-uint8_t eight[5][5] = {
-    {1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1},
-    {1, 0, 0, 0, 1},
-    {1, 1, 1, 1, 1}
-};
+uint8_t eight[5][5] = {{1, 1, 1, 1, 1},
+                       {1, 0, 0, 0, 1},
+                       {1, 1, 1, 1, 1},
+                       {1, 0, 0, 0, 1},
+                       {1, 1, 1, 1, 1}};
 
 void nt::App::OnNewVirtualMachineInstalled()
 {
@@ -283,4 +282,3 @@ void nt::App::OnNewVirtualMachineInstalled()
 
     renderer->InitRenderData(buffer);
 }
-

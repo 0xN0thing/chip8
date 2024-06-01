@@ -27,7 +27,6 @@ namespace nt
           protected:
             IVirtualMachine();
 
-
             void cls_00e0();
             void ret_00ee();
             void jp_1nnn();
@@ -66,6 +65,7 @@ namespace nt
             void null_0();
 
             virtual uint8_t GenRandom() = 0;
+
           public:
             virtual ~IVirtualMachine();
 
@@ -75,25 +75,27 @@ namespace nt
 
             const uint16_t GetCurrentOpcode() const;
             const uint16_t GetPC() const;
-            const uint16_t* const GetStack() const;
-            const uint8_t* const GetRegisters() const;
+            const uint16_t *const GetStack() const;
+            const uint8_t *const GetRegisters() const;
 
-            void LoadRom(const char* bytes, int len);
-            void LoadFont(const uint8_t* const buffer, const uint32_t fontSize);
+            void LoadRom(const char *bytes, int len);
+            void LoadFont(const uint8_t *const buffer, const uint32_t fontSize);
 
-            virtual void LoadRomFromFile(const char* path) = 0;
+            virtual void LoadRomFromFile(const char *path) = 0;
 
             void ClearScreen();
 
-            uint8_t* KeyPad();
+            uint8_t *KeyPad();
 
           private:
+            void InstallInstructions();
+
             typedef void (IVirtualMachine::*Chip8Instruction)();
-            Chip8Instruction vtable[17];
-            Chip8Instruction vtable0[15];
-            Chip8Instruction vtable8[15];
+            Chip8Instruction vtable[0xF + 1];
+            Chip8Instruction vtable0[0xE + 1];
+            Chip8Instruction vtable8[0xE + 1];
+            Chip8Instruction vtableE[0xE + 1];
             Chip8Instruction vtableF[0x65 + 1];
-            Chip8Instruction vtableE[15];
 
             void Table0();
             void Table8();

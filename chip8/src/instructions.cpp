@@ -94,7 +94,7 @@ void nt::chip8::IVirtualMachine::or_8xy1()
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
-    registers[Vx] = registers[Vy] | registers[Vx];
+    registers[Vx] |= registers[Vy];
 }
 
 void nt::chip8::IVirtualMachine::and_8xy2()
@@ -102,7 +102,7 @@ void nt::chip8::IVirtualMachine::and_8xy2()
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
-    registers[Vx] = registers[Vy] & registers[Vx];
+    registers[Vx] &= registers[Vy];
 }
 
 void nt::chip8::IVirtualMachine::xor_8xy3()
@@ -110,7 +110,7 @@ void nt::chip8::IVirtualMachine::xor_8xy3()
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
-    registers[Vx] = registers[Vy] ^ registers[Vx];
+    registers[Vx] ^= registers[Vy];
 }
 
 void nt::chip8::IVirtualMachine::add_8xy4()
@@ -118,7 +118,7 @@ void nt::chip8::IVirtualMachine::add_8xy4()
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
-    uint16_t res = registers[Vy] + registers[Vx];
+    uint16_t res = registers[Vx] + registers[Vy];
 
     registers[REG_VF] = res > 255;
     registers[Vx] = res & 0x00FF;
@@ -130,7 +130,7 @@ void nt::chip8::IVirtualMachine::sub_8xy5()
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
 
     registers[REG_VF] = registers[Vx] > registers[Vy];
-    registers[Vx] = registers[Vx] - registers[Vy];
+    registers[Vx] -= registers[Vy];
 }
 
 void nt::chip8::IVirtualMachine::shr_8xy6()
@@ -155,7 +155,7 @@ void nt::chip8::IVirtualMachine::subn_8xy7()
 void nt::chip8::IVirtualMachine::shl_8xyE()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-    registers[REG_VF] = registers[Vx] >> 7u;
+    registers[REG_VF] = (registers[Vx] & 0x80u) >> 7u;
 
     registers[Vx] <<= 1;
 }
@@ -193,26 +193,36 @@ void nt::chip8::IVirtualMachine::drw_dxyn()
     uint8_t Vy = (opcode & 0x00F0u) >> 4u;
     uint8_t height = opcode & 0x000Fu;
 
-    uint8_t startX = registers[Vx] % VIDEO_WIDTH;
-    uint8_t startY = registers[Vy] % VIDEO_HEIGHT;
+    // Wrap if going beyond screen boundaries
+    uint8_t xPos = registers[Vx] % VIDEO_WIDTH;
+    uint8_t yPos = registers[Vy] % VIDEO_HEIGHT;
 
-    registers[REG_VF] = 0;
+    registers[0xF] = 0;
 
-    for (uint32_t row = 0; row < height; row += 1)
+    for (unsigned int row = 0; row < height; ++row)
     {
         uint8_t spriteByte = memory[index + row];
-        for (uint32_t col = 0; col < 8; col += 1)
+
+        for (unsigned int col = 0; col < 8; ++col)
         {
             uint8_t spritePixel = spriteByte & (0x80u >> col);
-            uint32_t *screenPixel =
-                &video[(row + startY) * VIDEO_WIDTH + (col + startX)];
 
+            // Calculate the screen position with wrapping
+            uint32_t screenX = (xPos + col) % VIDEO_WIDTH;
+            uint32_t screenY = (yPos + row) % VIDEO_HEIGHT;
+
+            uint32_t *screenPixel = &video[screenY * VIDEO_WIDTH + screenX];
+
+            // Sprite pixel is on
             if (spritePixel)
             {
-                if (*screenPixel == 0xfffffff)
+                // Screen pixel also on - collision
+                if (*screenPixel == 0xFFFFFFFF)
                 {
-                    registers[REG_VF] = 1;
+                    registers[0xF] = 1;
                 }
+
+                // Effectively XOR with the sprite pixel
                 *screenPixel ^= 0xFFFFFFFF;
             }
         }
@@ -222,6 +232,8 @@ void nt::chip8::IVirtualMachine::drw_dxyn()
 void nt::chip8::IVirtualMachine::skp_ex9e()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
+    uint8_t key = registers[Vx];
+
     if (keypad[registers[Vx]])
     {
         pc += 2;
@@ -231,7 +243,9 @@ void nt::chip8::IVirtualMachine::skp_ex9e()
 void nt::chip8::IVirtualMachine::sknp_exa1()
 {
     uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-    if (!keypad[registers[Vx]])
+    uint8_t key = registers[Vx];
+
+    if (!keypad[key])
     {
         pc += 2;
     }

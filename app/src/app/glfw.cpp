@@ -18,7 +18,6 @@ nt::GLFW::GLFW()
     {
         throw std::runtime_error("failed to initialize glfw!");
     }
-
 }
 
 nt::GLFW::~GLFW() { glfwTerminate(); }
